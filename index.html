@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>WebScanner</title>
+</head>
+<body>
+    <h1>WebScanner</h1>
+    <button id="get" onclick="getImage()">开始扫描</button>
+    <button id="download" onclick="downloadImage()" disabled>下载</button>
+    <br><br><hr>
+    <img id="image" src="" alt="" width="100%">
+
+    <script>
+        function getImage() {
+            document.getElementById('get').disabled = true;
+            document.getElementById('get').innerText = '正在扫描';
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/get", true);
+            xhr.responseType = "blob";
+            xhr.onload = function() {
+                document.getElementById('get').disabled = false;
+                document.getElementById('get').innerText = '开始扫描';
+                if (xhr.status === 200) {
+                    var urlCreator = window.URL || window.webkitURL;
+                    var imageUrl = urlCreator.createObjectURL(this.response);
+                    var img = document.getElementById("image");
+                    img.src = imageUrl;
+                    document.getElementById('download').disabled = false;
+                } else {
+                    alert('设备繁忙，请稍后再试！');
+                }
+            };
+            xhr.send();
+        }
+
+        function downloadImage() {
+            var img = document.getElementById("image");
+            var url = img.src;
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "scan " + (new Date().toLocaleString('cn')) + ".jpg";
+            document.body.appendChild(a);
+            a.click();
+        }
+    </script>
+</body>
+</html>
