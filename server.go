@@ -75,8 +75,16 @@ func main() {
 
 	addr := fmt.Sprintf(":%d", config.Port)
 	if config.EnableHTTPS {
-		http.ListenAndServeTLS(addr, "cert.pem", "key.pem", nil)
+		err = http.ListenAndServeTLS(addr, "cert.pem", "key.pem", nil)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	} else {
-		http.ListenAndServe(addr, nil)
+		err = http.ListenAndServe(addr, nil)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 }
