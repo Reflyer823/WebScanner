@@ -1,0 +1,4 @@
+port: 8632
+username: admin
+password: password
+enableHttps: true

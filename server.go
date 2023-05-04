@@ -1,18 +1,40 @@
 package main
 
 import (
-	// "fmt"
-	// "io/ioutil"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os/exec"
 	"sync"
+	"gopkg.in/yaml.v3"
 )
+
+type Config struct {
+	Port int `yaml:"port"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	EnableHTTPS bool `yaml:"enableHttps"`
+}
 
 var (
 	mutex sync.Mutex
+	config Config
 )
 
 func main() {
+	// Load Config File
+	config_str, err := ioutil.ReadFile("./config.yaml")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = yaml.Unmarshal(config_str, &config)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		username, password, ok := r.BasicAuth()
         if !ok {
@@ -21,7 +43,7 @@ func main() {
             return
         }
 
-        if username != "admin" || password != "password" {
+        if username != config.Username || password != config.Password {
             http.Error(w, "Unauthorized", http.StatusUnauthorized)
             return
         }
@@ -51,5 +73,10 @@ func main() {
 		http.NotFound(w, r)
 	})
 
-	http.ListenAndServe(":8080", nil)
+	addr := fmt.Sprintf(":%d", config.Port)
+	if config.EnableHTTPS {
+		http.ListenAndServeTLS(addr, "cert.pem", "key.pem", nil)
+	} else {
+		http.ListenAndServe(addr, nil)
+	}
 }

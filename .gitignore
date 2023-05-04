@@ -1,1 +1,4 @@
-server
+WebScanner
+cert.pem
+csr.pem
+key.pem
